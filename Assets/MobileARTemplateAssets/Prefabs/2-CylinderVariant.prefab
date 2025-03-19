@@ -36,7 +36,7 @@ PrefabInstance:
     - target: {fileID: 1050199028471765157, guid: f37f07d3d500d0841a1aee3e699d4ebd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.62385
+      value: -0.89
       objectReference: {fileID: 0}
     - target: {fileID: 1050199028471765157, guid: f37f07d3d500d0841a1aee3e699d4ebd,
         type: 3}
@@ -126,7 +126,7 @@ PrefabInstance:
     - target: {fileID: 5239885138427989381, guid: 894d54703eb1549009ad9f909fc154d7,
         type: 3}
       propertyPath: m_Name
-      value: CylinderVariant
+      value: 2-CylinderVariant
       objectReference: {fileID: 0}
     - target: {fileID: 8576357361225267813, guid: 894d54703eb1549009ad9f909fc154d7,
         type: 3}
