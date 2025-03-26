@@ -46,13 +46,13 @@ public class BurgerGameManager : MonoBehaviour
     private Dictionary<string, float> ingredientHeights = new Dictionary<string, float>
     {
         { "Plate", 0.02f },
-        { "BottomBread", 0.02f },
-        { "TopBread", 0.02f },
+        { "BottomBread", 0.1f },
+        { "TopBread", 0.1f },
         { "Lettuce", 0.02f },
         { "Onion", 0.02f },
-        { "Cheese", 0.02f },
-        { "Tomato", 0.02f },
-        { "Burger", 0.5f }
+        { "Cheese", 0.01f },
+        { "Tomato", 0.05f },
+        { "Burger", 0.05f }
     };
 
     void Start()
@@ -236,6 +236,7 @@ public class BurgerGameManager : MonoBehaviour
             currentState = GameState.Completed;
             Debug.Log("Correct! You built the burger perfectly!");
             UpdateRecipeUI("Correct! You built the perfect burger!\n\nPlace plate again to start a new game.");
+
         }
         else
         {
