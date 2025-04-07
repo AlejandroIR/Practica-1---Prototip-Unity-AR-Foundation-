@@ -17,16 +17,27 @@ public class BurgerGameManager : MonoBehaviour
 
     [SerializeField]
     private TMP_Text recipeText; 
-
+    
+    [SerializeField]
+    private TMP_Text timerTXT;
+    
     [SerializeField] 
     private float stackingHeight = 0.05f; // Default height
-
+    
     [SerializeField]
     private string plateObjectName = "Plate";
+    
+    [SerializeField]
+    private float gameDuration = 90f; // 1 minute 30 seconds
+    
+    private float currentTime;
+    private int currentScore = 0;
+    private bool timerRunning = false;
 
     private GameState currentState = GameState.WaitingForPlate;
     private List<string> recipe = new List<string>();
     private List<string> placedIngredients = new List<string>();
+    private List<GameObject> placedIngredientObjects = new List<GameObject>();
     private GameObject plateObject;
     private Vector3 lastStackPosition;
     private float currentStackHeight;
@@ -67,6 +78,24 @@ public class BurgerGameManager : MonoBehaviour
         }
 
         UpdateRecipeUI("Place the plate to start the game!");
+        UpdateScoreUI();
+    }
+
+    void Update()
+    {
+        if (timerRunning)
+        {
+            currentTime -= Time.deltaTime;
+            
+            if (currentTime <= 0)
+            {
+                currentTime = 0;
+                timerRunning = false;
+                GameOver();
+            }
+            
+            UpdateTimerUI();
+        }
     }
 
     void OnDestroy()
@@ -81,6 +110,13 @@ public class BurgerGameManager : MonoBehaviour
     {
         string ingredientName = GetIngredientNameFromObject(spawnedObject);
 
+        if (ingredientName == plateObjectName && plateObject != null && currentState != GameState.WaitingForPlate)
+        {
+            Debug.Log("Only one plate can be used at a time!");
+            Destroy(spawnedObject);
+            return;
+        }
+
         if (currentState == GameState.WaitingForPlate)
         {
             if (ingredientName == plateObjectName)
@@ -90,6 +126,16 @@ public class BurgerGameManager : MonoBehaviour
                 lastStackPosition = plateObject.transform.position;
                 currentStackHeight = 0f;
                 currentState = GameState.BuildingBurger;
+                
+                // Reset score at the beginning of a new game
+                if (!timerRunning)
+                {
+                    currentScore = 0;
+                    UpdateScoreUI();
+                }
+                
+                // Start the timer when the first plate is placed
+                StartTimer();
                 
                 GenerateRandomRecipe();
                 UpdateRecipeUI(GetRecipeDisplayText());
@@ -109,6 +155,11 @@ public class BurgerGameManager : MonoBehaviour
             
             // Track the placed ingredient
             placedIngredients.Add(ingredientName);
+            
+            // Store reference to the placed ingredient object
+            if (ingredientName != plateObjectName) {
+                placedIngredientObjects.Add(spawnedObject);
+            }
             
             Debug.Log($"Added {ingredientName} to the burger. ({placedIngredients.Count}/{recipe.Count})");
             
@@ -217,6 +268,26 @@ public class BurgerGameManager : MonoBehaviour
         }
     }
 
+    private void UpdateTimerUI()
+    {
+        int minutes = Mathf.FloorToInt(currentTime / 60);
+        int seconds = Mathf.FloorToInt(currentTime % 60);
+        if (timerTXT != null)
+        {
+            timerTXT.text = $"Time: {minutes:00}:{seconds:00}";
+        }
+    }
+
+    private void UpdateScoreUI()
+    {
+        if (recipeText != null)
+        {
+            // Add score to the top of recipe instructions
+            string currentRecipe = recipeText.text;
+            recipeText.text = $"Score: {currentScore}\n\n{currentRecipe}";
+        }
+    }
+
     private void CheckBurger()
     {
         bool isCorrect = true;
@@ -233,17 +304,32 @@ public class BurgerGameManager : MonoBehaviour
         
         if (isCorrect)
         {
-            currentState = GameState.Completed;
+            // Award points for correct burger if timer is still running
+            if (timerRunning)
+            {
+                currentScore += 100;
+                UpdateScoreUI();
+            }
+            
             Debug.Log("Correct! You built the burger perfectly!");
-            UpdateRecipeUI("Correct! You built the perfect burger!\n\nPlace plate again to start a new game.");
-
+            UpdateRecipeUI($"Correct! +100 points\nTotal score: {currentScore}");
+            
+            // After a short delay, generate a new recipe but don't reset the game
+            Invoke("ContinueNextBurger", 0.5f);
         }
         else
         {
             Debug.Log("Incorrect. Your burger doesn't match the recipe.");
             UpdateRecipeUI("Incorrect burger! Try again.\n" + GetRecipeDisplayText());
             
-            // Allow the player to try again
+            // Destroy all placed ingredients but keep the plate
+            foreach (GameObject ingredient in placedIngredientObjects)
+            {
+                Destroy(ingredient);
+            }
+            
+            // Clear the ingredient lists
+            placedIngredientObjects.Clear();
             placedIngredients.Clear();
             
             // Reset stack height but keep the plate position
@@ -252,22 +338,64 @@ public class BurgerGameManager : MonoBehaviour
         }
     }
 
+    private void ContinueNextBurger()
+    {
+        // Clear all ingredients but keep the plate
+        foreach (GameObject ingredient in placedIngredientObjects)
+        {
+            Destroy(ingredient);
+        }
+        
+        // Clear tracking lists
+        placedIngredientObjects.Clear();
+        placedIngredients.Clear();
+        
+        // Reset stack height but keep plate position
+        currentStackHeight = 0f;
+        lastStackPosition = plateObject.transform.position;
+        
+        // Generate new recipe
+        GenerateRandomRecipe();
+        UpdateRecipeUI(GetRecipeDisplayText());
+    }
+
+    private void StartTimer()
+    {
+        currentTime = gameDuration;
+        timerRunning = true;
+        UpdateTimerUI();
+    }
+
+    private void GameOver()
+    {
+        UpdateRecipeUI($"Game Over!\nFinal Score: {currentScore}\n\nPlace plate to start a new game.");
+            Invoke("ResetGame", 2f);
+    }
+
     // Call this method to reset the game (can be called from a UI button)
     public void ResetGame()
     {
         currentState = GameState.WaitingForPlate;
+        timerRunning = false;
+        
+        // Destroy all placed ingredients
+        foreach (GameObject ingredient in placedIngredientObjects)
+        {
+            Destroy(ingredient);
+        }
+        
+        // Destroy the plate if it exists
+        if (plateObject != null)
+        {
+            Destroy(plateObject);
+            plateObject = null;
+        }
+        
+        // Clear the tracking lists
         placedIngredients.Clear();
+        placedIngredientObjects.Clear();
         recipe.Clear();
         
         UpdateRecipeUI("Place the plate to start the game!");
-        
-        // Destroy all spawned objects
-        if (objectSpawner != null && objectSpawner.transform.childCount > 0)
-        {
-            foreach (Transform child in objectSpawner.transform)
-            {
-                Destroy(child.gameObject);
-            }
-        }
     }
 }
