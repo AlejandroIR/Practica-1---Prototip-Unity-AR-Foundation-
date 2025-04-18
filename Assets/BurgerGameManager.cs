@@ -21,7 +21,7 @@ public class BurgerGameManager : MonoBehaviour
     [SerializeField]
     private TMP_Text timerTXT;
     
-    [SerializeField] 
+    [SerializeField]
     private float stackingHeight = 0.05f; // Default height
     
     [SerializeField]
@@ -29,7 +29,22 @@ public class BurgerGameManager : MonoBehaviour
     
     [SerializeField]
     private float gameDuration = 90f; // 1 minute 30 seconds
-    
+
+    [Header("SFX Clips")]
+    [SerializeField] private AudioClip placementClip;       // colocar objeto
+    [SerializeField] private AudioClip successClip;         // mision hecha
+    [SerializeField] private AudioClip failClip;            // mision fallida
+    [SerializeField] private AudioClip missionCompleteClip; //
+
+    [Header("Music Clips")]
+    [SerializeField] private AudioClip gameMusicClip;       // musica juego
+    [SerializeField] private AudioClip menuMusicClip;       // musica menu
+
+    [Header("Audio Sources")]
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioSource musicSource;
+
+
     private float currentTime;
     private int currentScore = 0;
     private bool timerRunning = false;
@@ -75,6 +90,13 @@ public class BurgerGameManager : MonoBehaviour
         else
         {
             Debug.LogError("ObjectSpawner reference is missing!", this);
+        }
+
+        if (musicSource != null && gameMusicClip != null)
+        {
+            musicSource.clip = gameMusicClip;
+            musicSource.loop = true;
+            musicSource.Play();
         }
 
         UpdateRecipeUI("Place the plate to start the game!");
@@ -150,6 +172,9 @@ public class BurgerGameManager : MonoBehaviour
         }
         else if (currentState == GameState.BuildingBurger)
         {
+
+            if (sfxSource != null && placementClip != null) {sfxSource.PlayOneShot(placementClip);}
+
             // Position the ingredient above the last one
             PositionIngredient(spawnedObject);
             
@@ -304,6 +329,8 @@ public class BurgerGameManager : MonoBehaviour
         
         if (isCorrect)
         {
+            if (sfxSource != null && successClip != null) { sfxSource.PlayOneShot(successClip); }
+
             // Award points for correct burger if timer is still running
             if (timerRunning)
             {
@@ -321,7 +348,9 @@ public class BurgerGameManager : MonoBehaviour
         {
             Debug.Log("Incorrect. Your burger doesn't match the recipe.");
             UpdateRecipeUI("Incorrect burger! Try again.\n" + GetRecipeDisplayText());
-            
+
+            if (sfxSource != null && failClip != null) { sfxSource.PlayOneShot(failClip); }
+
             // Destroy all placed ingredients but keep the plate
             foreach (GameObject ingredient in placedIngredientObjects)
             {
