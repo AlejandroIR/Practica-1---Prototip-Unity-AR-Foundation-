@@ -236,7 +236,7 @@ MonoBehaviour:
   gameDuration: 80.84
   placementClip: {fileID: 8300000, guid: abc0b1c6b7cbf9d47b5c18f876d7896c, type: 3}
   successClip: {fileID: 8300000, guid: c729dd6534845fb499d0ddc5a242b5b3, type: 3}
-  failClip: {fileID: 0}
+  failClip: {fileID: 8300000, guid: 05409242223c04944a81f4b29c62e421, type: 3}
   missionCompleteClip: {fileID: 0}
   gameMusicClip: {fileID: 8300000, guid: 94365fc63af0a804887f5a302cbd68c3, type: 3}
   menuMusicClip: {fileID: 8300000, guid: 94365fc63af0a804887f5a302cbd68c3, type: 3}
