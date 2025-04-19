@@ -20,7 +20,10 @@ public class BurgerGameManager : MonoBehaviour
     
     [SerializeField]
     private TMP_Text timerTXT;
-    
+
+    [SerializeField] 
+    private TMP_Text scoreText;
+
     [SerializeField]
     private float stackingHeight = 0.05f; // Default height
     
@@ -299,7 +302,16 @@ public class BurgerGameManager : MonoBehaviour
         int seconds = Mathf.FloorToInt(currentTime % 60);
         if (timerTXT != null)
         {
-            timerTXT.text = $"Time: {minutes:00}:{seconds:00}";
+            timerTXT.text = $" {minutes:00}:{seconds:00}";
+
+            if (currentTime <= 10f)
+            {
+                timerTXT.color = Color.red;
+            }
+            else
+            {
+                timerTXT.color = Color.white;
+            }
         }
     }
 
@@ -310,6 +322,7 @@ public class BurgerGameManager : MonoBehaviour
             // Add score to the top of recipe instructions
             string currentRecipe = recipeText.text;
             recipeText.text = $"Score: {currentScore}\n\n{currentRecipe}";
+            scoreText.text = $" {currentScore}";
         }
     }
 
