@@ -308,7 +308,6 @@ public class BurgerGameManager : MonoBehaviour
             }
         }
         
-        text += "\n(Place ingredients in order from bottom to top)";
         return text;
     }
 
