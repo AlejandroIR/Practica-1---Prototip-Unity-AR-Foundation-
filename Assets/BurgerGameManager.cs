@@ -194,13 +194,6 @@ public class BurgerGameManager : MonoBehaviour
             // Track the placed ingredient
             placedIngredients.Add(ingredientName);
 
-            int index = placedIngredients.Count - 1;
-
-            if (index < recipe.Count && placedIngredients[index] != recipe[index])
-            {
-                CheckBurger();
-            }
-
             // Store reference to the placed ingredient object
             if (ingredientName != plateObjectName) {
                 placedIngredientObjects.Add(spawnedObject);
@@ -210,6 +203,13 @@ public class BurgerGameManager : MonoBehaviour
             
             // Check if we've placed all ingredients
             if (placedIngredients.Count == recipe.Count)
+            {
+                CheckBurger();
+            }
+
+            int index = placedIngredients.Count - 1;
+
+            if (index < recipe.Count && placedIngredients[index] != recipe[index])
             {
                 CheckBurger();
             }
