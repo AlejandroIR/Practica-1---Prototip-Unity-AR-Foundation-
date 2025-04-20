@@ -33,6 +33,12 @@ public class BurgerGameManager : MonoBehaviour
     [SerializeField]
     private float gameDuration = 90f; // 1 minute 30 seconds
 
+    [Header("Some UI :)")]
+    [SerializeField] private GameObject imagePlacePlate;
+    [SerializeField] private GameObject imageRecipe;
+    [SerializeField] private GameObject imageCorrectBurger;
+    [SerializeField] private GameObject imageWrongBurger;
+
     [Header("SFX Clips")]
     [SerializeField] private AudioClip placementClip;       // colocar objeto
     [SerializeField] private AudioClip successClip;         // mision hecha
@@ -103,6 +109,8 @@ public class BurgerGameManager : MonoBehaviour
         }
 
         UpdateRecipeUI("Place the plate to start the game!");
+        imagePlacePlate.SetActive(true);
+        imageRecipe.SetActive(false);
         UpdateScoreUI();
     }
 
@@ -163,6 +171,8 @@ public class BurgerGameManager : MonoBehaviour
                 StartTimer();
                 
                 GenerateRandomRecipe();
+                imagePlacePlate.SetActive(false);
+                imageRecipe.SetActive(true);
                 UpdateRecipeUI(GetRecipeDisplayText());
                 Debug.Log("Plate placed! Now build the burger according to the recipe.");
             }
@@ -183,7 +193,13 @@ public class BurgerGameManager : MonoBehaviour
             
             // Track the placed ingredient
             placedIngredients.Add(ingredientName);
-            
+
+            int index = placedIngredients.Count - 1;
+
+            if (index < recipe.Count && placedIngredients[index] != recipe[index])
+            {
+                CheckBurger();
+            }
             // Store reference to the placed ingredient object
             if (ingredientName != plateObjectName) {
                 placedIngredientObjects.Add(spawnedObject);
@@ -263,13 +279,20 @@ public class BurgerGameManager : MonoBehaviour
             string randomIngredient = possibleIngredients[Random.Range(0, possibleIngredients.Length)];
             recipe.Add(randomIngredient);
         }
-        
+
+        if (!recipe.Contains("Burger"))
+        {
+            recipe.Add("Burger");
+        }
+
         // Last ingredient is always top bread
         recipe.Add("TopBread");
     }
 
     private string GetRecipeDisplayText()
     {
+        imageCorrectBurger.SetActive(false);
+        imageWrongBurger.SetActive(false);
         string text = "Make a burger with:\n";
         
         foreach (string ingredient in recipe)
@@ -320,8 +343,8 @@ public class BurgerGameManager : MonoBehaviour
         if (recipeText != null)
         {
             // Add score to the top of recipe instructions
-            string currentRecipe = recipeText.text;
-            recipeText.text = $"Score: {currentScore}\n\n{currentRecipe}";
+            /*string currentRecipe = recipeText.text;
+            recipeText.text = $"Score: {currentScore}\n\n{currentRecipe}";*/
             scoreText.text = $" {currentScore}";
         }
     }
@@ -339,7 +362,7 @@ public class BurgerGameManager : MonoBehaviour
                 break;
             }
         }
-        
+
         if (isCorrect)
         {
             if (sfxSource != null && successClip != null) { sfxSource.PlayOneShot(successClip); }
@@ -352,6 +375,7 @@ public class BurgerGameManager : MonoBehaviour
             }
             
             Debug.Log("Correct! You built the burger perfectly!");
+            imageCorrectBurger.SetActive(true);
             UpdateRecipeUI($"Correct! +100 points\nTotal score: {currentScore}");
             
             // After a short delay, generate a new recipe but don't reset the game
@@ -360,6 +384,7 @@ public class BurgerGameManager : MonoBehaviour
         else
         {
             Debug.Log("Incorrect. Your burger doesn't match the recipe.");
+            imageWrongBurger.SetActive(true);
             UpdateRecipeUI("Incorrect burger! Try again.\n" + GetRecipeDisplayText());
 
             if (sfxSource != null && failClip != null) { sfxSource.PlayOneShot(failClip); }
@@ -437,7 +462,9 @@ public class BurgerGameManager : MonoBehaviour
         placedIngredients.Clear();
         placedIngredientObjects.Clear();
         recipe.Clear();
-        
+
+        imageRecipe.SetActive(false);
+        imagePlacePlate.SetActive(true);
         UpdateRecipeUI("Place the plate to start the game!");
     }
 }
